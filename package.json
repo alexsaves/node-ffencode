@@ -1,0 +1,23 @@
+{
+  "name": "ffencode",
+  "version": "0.0.1",
+  "description": "Frame-by-frame Video Encoding Via FFMPeg",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://alexsaves@github.com/alexsaves/node-ffencode.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/alexsaves/node-ffencode/issues"
+  },
+  "homepage": "https://github.com/alexsaves/node-ffencode#readme",
+  "dependencies": {
+    "bindings": "^1.3.0",
+    "nan": "^2.10.0"
+  }
+}
