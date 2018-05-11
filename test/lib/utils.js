@@ -12,8 +12,10 @@ const MakeFakeImageRGBABuffer = function(width, height) {
     arr[(i * 4) + 2] = Math.round((Math.random() * 100) + 155);
     arr[(i * 4) + 3] = 255;
   }
-  return ArrayBuffer.from(arr);
+  return Buffer.from(arr);
 };
 
 // Export it
-module.exports = {MakeFakeImageBuffer};
+module.exports = {
+  MakeFakeImageRGBABuffer
+};
