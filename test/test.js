@@ -7,7 +7,7 @@ var size = {
 };
 var fencoder = new FFencode(size.width, size.height, 5, "./out.mp4");
 
-for (let i = 0; i < 100; i++) {
+for (let i = 0; i < 5; i++) {
   fencoder.addRGBABufferFrame(MakeFakeImageRGBABuffer(size.width, size.height));
   console.log(`Added frame ${i}.`);
 }
