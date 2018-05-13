@@ -37,11 +37,20 @@ class FFEncode {
 
   /**
    * Add a frame for the video
-   * @param {Buffer} buf 
+   * @param {Buffer} buf RGBA Pixel buffer
+   * @param {Number} width Width of image (must be <= movie width)
+   * @param {Number} height Height of image (must be <= movie height)
    */
-  addRGBABufferFrame(buf) {
+  addRGBABufferFrame(buf, width, height) {
     if (!(buf instanceof Buffer)) {
       throw new Error("Argument must be a buffer.");
+    }
+    if (isNaN(width) || isNaN(height)) {
+      width = this.width;
+      height = this.height;
+    }
+    if (width * height * 4 != buf.length) {
+      throw new Error("Buffer length does not match provided width and height * 4 (not an RGBA array?)");
     }
     this._enc.addFrame(buf);
   }

@@ -21,6 +21,8 @@ NAN_MODULE_INIT(FFEncoder::Init)
   Nan::SetAccessor(ctor->InstanceTemplate(), Nan::New("filename").ToLocalChecked(), FFEncoder::HandleGetters, FFEncoder::HandleSetters);
 
   Nan::SetPrototypeMethod(ctor, "addFrame", AddFrame);
+  Nan::SetPrototypeMethod(ctor, "getPNGFromFrame", GetPNGFromFrame);
+  Nan::SetPrototypeMethod(ctor, "getBufferFromFrame", GetBufferFromFrame);
 
   target->Set(Nan::New("FFEncoder").ToLocalChecked(), ctor->GetFunction());
 }
@@ -62,6 +64,63 @@ NAN_METHOD(FFEncoder::New)
   info.GetReturnValue().Set(info.Holder());
 }
 
+// Get a fully realized frame of video in the form of an RGBA Buffer
+NAN_METHOD(FFEncoder::GetBufferFromFrame)
+{
+  // unwrap this Vector
+  FFEncoder *self = Nan::ObjectWrap::Unwrap<FFEncoder>(info.This());
+/*
+  if (!Nan::New(FFEncoder::constructor)->HasInstance(info[0]))
+  {
+    return Nan::ThrowError(Nan::New("Vector::Add - expected argument to be instance of Vector").ToLocalChecked());
+  }
+  // unwrap the Vector passed as argument
+  Vector *otherVec = Nan::ObjectWrap::Unwrap<Vector>(info[0]->ToObject());
+
+  // specify argument counts and constructor arguments
+  const int argc = 3;
+  v8::Local<v8::Value> argv[argc] = {
+      Nan::New(self->x + otherVec->x),
+      Nan::New(self->y + otherVec->y),
+      Nan::New(self->z + otherVec->z)};
+
+  // get a local handle to our constructor function
+  v8::Local<v8::Function> constructorFunc = Nan::New(Vector::constructor)->GetFunction();
+  // create a new JS instance from arguments
+  v8::Local<v8::Object> jsSumVec = Nan::NewInstance(constructorFunc, argc, argv).ToLocalChecked();
+
+  info.GetReturnValue().Set(jsSumVec);*/
+}
+
+// Get a fully realized frame of video in the form of a PNG
+NAN_METHOD(FFEncoder::GetPNGFromFrame)
+{
+  // unwrap this Vector
+  FFEncoder *self = Nan::ObjectWrap::Unwrap<FFEncoder>(info.This());
+/*
+  if (!Nan::New(FFEncoder::constructor)->HasInstance(info[0]))
+  {
+    return Nan::ThrowError(Nan::New("Vector::Add - expected argument to be instance of Vector").ToLocalChecked());
+  }
+  // unwrap the Vector passed as argument
+  Vector *otherVec = Nan::ObjectWrap::Unwrap<Vector>(info[0]->ToObject());
+
+  // specify argument counts and constructor arguments
+  const int argc = 3;
+  v8::Local<v8::Value> argv[argc] = {
+      Nan::New(self->x + otherVec->x),
+      Nan::New(self->y + otherVec->y),
+      Nan::New(self->z + otherVec->z)};
+
+  // get a local handle to our constructor function
+  v8::Local<v8::Function> constructorFunc = Nan::New(Vector::constructor)->GetFunction();
+  // create a new JS instance from arguments
+  v8::Local<v8::Object> jsSumVec = Nan::NewInstance(constructorFunc, argc, argv).ToLocalChecked();
+
+  info.GetReturnValue().Set(jsSumVec);*/
+}
+
+// Add a frame to the video stream
 NAN_METHOD(FFEncoder::AddFrame)
 {
   // unwrap this Vector
