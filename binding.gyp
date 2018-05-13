@@ -7,7 +7,7 @@
     ],
     "sources": [
       "src/index.cc",
-      "src/Vector.cc",
+      "src/lodepng.cc",
       "src/FFEncoder.cc"
     ]
   }]

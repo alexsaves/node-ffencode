@@ -23,3 +23,5 @@ public:
 
   static Nan::Persistent<v8::FunctionTemplate> constructor;
 };
+
+#endif
