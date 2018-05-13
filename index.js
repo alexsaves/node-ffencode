@@ -19,12 +19,20 @@ class FFEncode {
    * @param {Number} fps 
    */
   constructor(width, height, fps, filename) {
-    this.width = Math.round(width);
-    this.height = Math.round(height);
+    if (isNaN(width)) {
+      throw new Error("Invalid width parameter.");
+    }
+    if (isNaN(height)) {
+      throw new Error("Invalid height parameter.");
+    }
+    if (isNaN(fps)) {
+      throw new Error("Invalid fps parameter.");
+    }
+    this.width = Math.min(99999, Math.max(1, Math.round(width)));
+    this.height = Math.min(99999, Math.max(1, Math.round(height)));
     this.fps = Math.max(1, Math.min(120, Math.round(fps)));
     this.filename = filename || (shortid.generate() + ".mp4");
     this._enc = new FFEncoder(this.width, this.height, this.fps, this.filename);
-    console.log(this._enc);
   }
 
   /**
@@ -32,7 +40,10 @@ class FFEncode {
    * @param {Buffer} buf 
    */
   addRGBABufferFrame(buf) {
-
+    if (!(buf instanceof Buffer)) {
+      throw new Error("Argument must be a buffer.");
+    }
+    this._enc.addFrame(buf);
   }
 
   /**

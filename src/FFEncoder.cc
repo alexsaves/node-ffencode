@@ -20,6 +20,8 @@ NAN_MODULE_INIT(FFEncoder::Init)
   Nan::SetAccessor(ctor->InstanceTemplate(), Nan::New("fps").ToLocalChecked(), FFEncoder::HandleGetters, FFEncoder::HandleSetters);
   Nan::SetAccessor(ctor->InstanceTemplate(), Nan::New("filename").ToLocalChecked(), FFEncoder::HandleGetters, FFEncoder::HandleSetters);
 
+  Nan::SetPrototypeMethod(ctor, "addFrame", AddFrame);
+
   target->Set(Nan::New("FFEncoder").ToLocalChecked(), ctor->GetFunction());
 }
 
@@ -51,21 +53,43 @@ NAN_METHOD(FFEncoder::New)
   vec->Wrap(info.Holder());
 
   // initialize it's values
-  vec->width = info[0]->NumberValue();
-  vec->height = info[1]->NumberValue();
-  vec->fps = info[2]->NumberValue();
+  vec->width = info[0]->IntegerValue();
+  vec->height = info[1]->IntegerValue();
+  vec->fps = info[2]->IntegerValue();
   vec->filename = *v8::String::Utf8Value(isolate, info[3]);
-  //std::string attribute = *v8::String::Utf8Value(isolate, info[3]);
-  //std::string name = *v8::String::Utf8Value(info[3]->ToString());
-  //vec->filename = info[3]->ToString();
-  //v8::String::String param1(info[3]->ToString());
-  //vec->filename = std::string(*param1);
-  //v8::String::Utf8String val(info[3]->ToString());
 
-  // return the wrapped javascript instance
+  // Return the wrapped javascript instance
   info.GetReturnValue().Set(info.Holder());
 }
 
+NAN_METHOD(FFEncoder::AddFrame)
+{
+  // unwrap this Vector
+  FFEncoder *self = Nan::ObjectWrap::Unwrap<FFEncoder>(info.This());
+/*
+  if (!Nan::New(FFEncoder::constructor)->HasInstance(info[0]))
+  {
+    return Nan::ThrowError(Nan::New("Vector::Add - expected argument to be instance of Vector").ToLocalChecked());
+  }
+  // unwrap the Vector passed as argument
+  Vector *otherVec = Nan::ObjectWrap::Unwrap<Vector>(info[0]->ToObject());
+
+  // specify argument counts and constructor arguments
+  const int argc = 3;
+  v8::Local<v8::Value> argv[argc] = {
+      Nan::New(self->x + otherVec->x),
+      Nan::New(self->y + otherVec->y),
+      Nan::New(self->z + otherVec->z)};
+
+  // get a local handle to our constructor function
+  v8::Local<v8::Function> constructorFunc = Nan::New(Vector::constructor)->GetFunction();
+  // create a new JS instance from arguments
+  v8::Local<v8::Object> jsSumVec = Nan::NewInstance(constructorFunc, argc, argv).ToLocalChecked();
+
+  info.GetReturnValue().Set(jsSumVec);*/
+}
+
+// Property getters *****************
 NAN_GETTER(FFEncoder::HandleGetters)
 {
   FFEncoder *self = Nan::ObjectWrap::Unwrap<FFEncoder>(info.This());
@@ -94,6 +118,7 @@ NAN_GETTER(FFEncoder::HandleGetters)
   }
 }
 
+// Property setters ****************************
 NAN_SETTER(FFEncoder::HandleSetters)
 {
   FFEncoder *self = Nan::ObjectWrap::Unwrap<FFEncoder>(info.This());
@@ -106,14 +131,14 @@ NAN_SETTER(FFEncoder::HandleSetters)
   std::string propertyName = std::string(*Nan::Utf8String(property));
   if (propertyName == "width")
   {
-    self->width = value->NumberValue();
+    self->width = value->IntegerValue();
   }
   else if (propertyName == "height")
   {
-    self->height = value->NumberValue();
+    self->height = value->IntegerValue();
   }
   else if (propertyName == "fps")
   {
-    self->fps = value->NumberValue();
+    self->fps = value->IntegerValue();
   }
 }
