@@ -1,4 +1,5 @@
 #include <nan.h>
+#include <string>
 
 class FFEncoder : public Nan::ObjectWrap
 {
@@ -6,6 +7,7 @@ public:
   int width;
   int height;
   int fps;
+  std::string filename;
 
   static NAN_MODULE_INIT(Init);
   static NAN_METHOD(New);

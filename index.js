@@ -1,4 +1,5 @@
 const pjson = require('./package.json');
+const shortid = require('shortid');
 const fs = require('fs');
 var FFEncoder;
 if (fs.existsSync('./build/Debug/ffencode.node')) {
@@ -21,8 +22,8 @@ class FFEncode {
     this.width = Math.round(width);
     this.height = Math.round(height);
     this.fps = Math.max(1, Math.min(120, Math.round(fps)));
-    this.filename = filename;
-    this._enc = new FFEncoder(this.width, this.height, this.fps);
+    this.filename = filename || (shortid.generate() + ".mp4");
+    this._enc = new FFEncoder(this.width, this.height, this.fps, this.filename);
     console.log(this._enc);
   }
 
