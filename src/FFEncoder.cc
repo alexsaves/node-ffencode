@@ -36,10 +36,6 @@ NAN_MODULE_INIT(FFEncoder::Init)
   Nan::SetPrototypeMethod(ctor, "getPNGOfFrame", GetPNGOfFrame);
   Nan::SetPrototypeMethod(ctor, "drawRGBAImage", DrawRGBAImage);
   
-  
-  Nan::SetPrototypeMethod(ctor, "addFrame", AddFrame);
-  Nan::SetPrototypeMethod(ctor, "getPNGFromFrame", GetPNGFromFrame);
-  Nan::SetPrototypeMethod(ctor, "getBufferFromFrame", GetBufferFromFrame);
 
   target->Set(Nan::New("FFEncoder").ToLocalChecked(), ctor->GetFunction());
 }
@@ -174,103 +170,6 @@ NAN_METHOD(FFEncoder::GetPNGOfFrame)
   //delete [] convert_var;
 
   info.GetReturnValue().Set(Nan::NewBuffer(myArr, outVect.size()).ToLocalChecked());
-}
-
-// Get a fully realized frame of video in the form of an RGBA Buffer
-NAN_METHOD(FFEncoder::GetBufferFromFrame)
-{
-  // unwrap this Vector
-  FFEncoder *self = Nan::ObjectWrap::Unwrap<FFEncoder>(info.This());
-  int frame_width = info[1]->IntegerValue();
-  int frame_height = info[2]->IntegerValue();
-  utils::Rectangle targetRect = utils::size_image_to_fit(self->width, self->height, frame_width, frame_height);
-  //std::cout << "Target Movie: " << self->width << ", " << self->height << "\n";
-  //std::cout << "Frame: " << frame_width << ", " << frame_height << "\n";
-  //std::cout << "Rect Final: " << targetRect.x << ", " << targetRect.y << ", " << targetRect.w << ", " << targetRect.h << " \n";
-
-  v8::Local<v8::Object> bufferObj = info[0]->ToObject();
-  char* bufferData = node::Buffer::Data(bufferObj);
-  //size_t bufferLength = node::Buffer::Length(bufferObj);
-  
-  int pix_count = self->width * self->height;
-  int frame_len = pix_count * 4;
-
-  // Set up a copy of the blank slate
-  char * out_img = new char[frame_len];
-  memcpy ( &out_img, &self->blank_slate, sizeof(self->blank_slate) );
-
-  // Blit and size the image onto the frame
-  utils::blt_image_onto_frame(out_img, self->width, self->height, bufferData, frame_width, frame_height, targetRect);
-
-  info.GetReturnValue().Set(Nan::NewBuffer(out_img, frame_len).ToLocalChecked());
-}
-
-// Get a fully realized frame of video in the form of a PNG
-NAN_METHOD(FFEncoder::GetPNGFromFrame)
-{
-  // unwrap this Vector
-  FFEncoder *self = Nan::ObjectWrap::Unwrap<FFEncoder>(info.This());
-  int frame_width = info[1]->IntegerValue();
-  int frame_height = info[2]->IntegerValue();
-  utils::Rectangle targetRect = utils::size_image_to_fit(self->width, self->height, frame_width, frame_height);
-  //std::cout << "Target Movie: " << self->width << ", " << self->height << "\n";
-  //std::cout << "Frame: " << frame_width << ", " << frame_height << "\n";
-  //std::cout << "Rect Final: " << targetRect.x << ", " << targetRect.y << ", " << targetRect.w << ", " << targetRect.h << " \n";
-
-  v8::Local<v8::Object> bufferObj = info[0]->ToObject();
-  char* bufferData = node::Buffer::Data(bufferObj);
-  //size_t bufferLength = node::Buffer::Length(bufferObj);
-  
-  int pix_count = self->width * self->height;
-  int frame_len = pix_count * 4;
-
-  // Set up a copy of the blank slate
-  char * out_img = new char[frame_len];
-  memcpy ( &out_img, &self->blank_slate, sizeof(self->blank_slate) );
-
-  // Blit and size the image onto the frame
-  utils::blt_image_onto_frame(out_img, self->width, self->height, bufferData, frame_width, frame_height, targetRect);
-
-  unsigned char* convert_var = new unsigned char[frame_len];
-  memcpy ( &convert_var, &out_img, sizeof(out_img) );
-
-  // ENCODE AS PNG
-  std::vector<unsigned char> outVect;
-  lodepng::encode(outVect, convert_var, (unsigned)self->width, (unsigned)self->height);
-  char* myArr = new char[outVect.size()];
-  std::copy(outVect.begin(), outVect.end(), myArr);
-  delete [] out_img;
-  //delete [] convert_var;
-
-  info.GetReturnValue().Set(Nan::NewBuffer(myArr, outVect.size()).ToLocalChecked());
-}
-
-// Add a frame to the video stream
-NAN_METHOD(FFEncoder::AddFrame)
-{
-  // unwrap this Vector
-  FFEncoder *self = Nan::ObjectWrap::Unwrap<FFEncoder>(info.This());
-/*
-  if (!Nan::New(FFEncoder::constructor)->HasInstance(info[0]))
-  {
-    return Nan::ThrowError(Nan::New("Vector::Add - expected argument to be instance of Vector").ToLocalChecked());
-  }
-  // unwrap the Vector passed as argument
-  Vector *otherVec = Nan::ObjectWrap::Unwrap<Vector>(info[0]->ToObject());
-
-  // specify argument counts and constructor arguments
-  const int argc = 3;
-  v8::Local<v8::Value> argv[argc] = {
-      Nan::New(self->x + otherVec->x),
-      Nan::New(self->y + otherVec->y),
-      Nan::New(self->z + otherVec->z)};
-
-  // get a local handle to our constructor function
-  v8::Local<v8::Function> constructorFunc = Nan::New(Vector::constructor)->GetFunction();
-  // create a new JS instance from arguments
-  v8::Local<v8::Object> jsSumVec = Nan::NewInstance(constructorFunc, argc, argv).ToLocalChecked();
-
-  info.GetReturnValue().Set(jsSumVec);*/
 }
 
 // Property getters *****************
