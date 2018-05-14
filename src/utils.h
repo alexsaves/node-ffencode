@@ -15,7 +15,7 @@ namespace utils
   Rectangle size_image_to_fit(int width, int height, int image_width, int image_height);
 
   // Draw an image onto another image
-  void blt_image_onto_frame(char* base_frame, int frame_width, int frame_height, char* image, int image_width, int image_height, Rectangle where);
+  void blt_image_onto_frame(char* base_frame, int frame_width, int frame_height, char* image, int image_width, int image_height, Rectangle where, float opacity);
 }
 
 #endif

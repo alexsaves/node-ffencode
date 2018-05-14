@@ -34,7 +34,7 @@ namespace utils
   }
 
   // Draw an image onto another image
-  void blt_image_onto_frame(char* base_frame, int frame_width, int frame_height, char* image, int image_width, int image_height, Rectangle where) {
+  void blt_image_onto_frame(char* base_frame, int frame_width, int frame_height, char* image, int image_width, int image_height, Rectangle where, float opacity) {
     //std::cout << "Rect Final: " << where.x << ", " << where.y << ", " << where.w << ", " << where.h << " | frame: " << image_width << ", " << image_height << "\n";
     
     float src_y = 0;
@@ -166,7 +166,7 @@ namespace utils
 
             dest_offset = ((y * frame_width) + x) * 4;
 
-            if (af == 255) {
+            if (af == 255 && opacity == 1) {
               base_frame[dest_offset++] = (char)rf;
               base_frame[dest_offset++] = (char)gf;
               base_frame[dest_offset++] = (char)bf;
@@ -176,7 +176,7 @@ namespace utils
               src_g = (float)(int)(unsigned char)base_frame[dest_offset + 1];
               src_b = (float)(int)(unsigned char)base_frame[dest_offset + 2];
               src_a = (float)(int)(unsigned char)base_frame[dest_offset + 3];
-              opac_prog = (float)af / 255;
+              opac_prog = ((float)af / 255) * opacity;
               rf =  (int)((((float)rf * opac_prog) + (src_r * (1-opac_prog))));
               gf =  (int)((((float)gf * opac_prog) + (src_g * (1-opac_prog))));
               bf =  (int)((((float)bf * opac_prog) + (src_b * (1-opac_prog))));

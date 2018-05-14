@@ -35,7 +35,8 @@ NAN_MODULE_INIT(FFEncoder::Init)
   Nan::SetPrototypeMethod(ctor, "centerRGBAImage", CenterRGBAImage);
   Nan::SetPrototypeMethod(ctor, "getPNGOfFrame", GetPNGOfFrame);
   Nan::SetPrototypeMethod(ctor, "drawRGBAImage", DrawRGBAImage);
-  
+  Nan::SetPrototypeMethod(ctor, "getBufferOfFrame", GetBufferOfFrame);
+  Nan::SetPrototypeMethod(ctor, "dispose", Dispose);
 
   target->Set(Nan::New("FFEncoder").ToLocalChecked(), ctor->GetFunction());
 }
@@ -92,6 +93,13 @@ NAN_METHOD(FFEncoder::New)
   info.GetReturnValue().Set(info.Holder());
 }
 
+// Free up memory
+NAN_METHOD(FFEncoder::Dispose)
+{
+  //FFEncoder *self = Nan::ObjectWrap::Unwrap<FFEncoder>(info.This());
+  //delete [] self->blank_slate;
+}
+
 // Start a frame 
 NAN_METHOD(FFEncoder::OpenFrame)
 {
@@ -132,10 +140,7 @@ NAN_METHOD(FFEncoder::CenterRGBAImage)
   char* bufferData = node::Buffer::Data(bufferObj);
   
   // Blit and size the image onto the frame
-  utils::blt_image_onto_frame(self->current_frame, self->width, self->height, bufferData, frame_width, frame_height, targetRect);
-
-  // TODO: clean up bufferData?
-  //delete [] bufferData;
+  utils::blt_image_onto_frame(self->current_frame, self->width, self->height, bufferData, frame_width, frame_height, targetRect, 1);
 }
 
 // Draw an image at a specific place
@@ -149,10 +154,11 @@ NAN_METHOD(FFEncoder::DrawRGBAImage)
   targetRect.y = info[4]->IntegerValue();
   targetRect.w = info[5]->IntegerValue();
   targetRect.h = info[6]->IntegerValue();
+  float opacity = (float)info[7]->NumberValue();
   v8::Local<v8::Object> bufferObj = info[0]->ToObject();
   char* bufferData = node::Buffer::Data(bufferObj);
   // Blit and size the image onto the frame
-  utils::blt_image_onto_frame(self->current_frame, self->width, self->height, bufferData, frame_width, frame_height, targetRect);
+  utils::blt_image_onto_frame(self->current_frame, self->width, self->height, bufferData, frame_width, frame_height, targetRect, opacity);
 }
 
 // Get a PNG of the current frame
@@ -167,9 +173,15 @@ NAN_METHOD(FFEncoder::GetPNGOfFrame)
   lodepng::encode(outVect, convert_var, (unsigned)self->width, (unsigned)self->height);
   char* myArr = new char[outVect.size()];
   std::copy(outVect.begin(), outVect.end(), myArr);
-  //delete [] convert_var;
 
   info.GetReturnValue().Set(Nan::NewBuffer(myArr, outVect.size()).ToLocalChecked());
+}
+
+// Get an uncompressed RGBA buffer of the current frame
+NAN_METHOD(FFEncoder::GetBufferOfFrame) 
+{
+  FFEncoder *self = Nan::ObjectWrap::Unwrap<FFEncoder>(info.This());
+  info.GetReturnValue().Set(Nan::NewBuffer(self->current_frame, self->frame_len).ToLocalChecked());
 }
 
 // Property getters *****************

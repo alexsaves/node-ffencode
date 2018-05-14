@@ -24,6 +24,8 @@ public:
   static NAN_METHOD(CenterRGBAImage);
   static NAN_METHOD(DrawRGBAImage);
   static NAN_METHOD(GetPNGOfFrame);
+  static NAN_METHOD(GetBufferOfFrame);
+  static NAN_METHOD(Dispose);
 
   static NAN_GETTER(HandleGetters);
   static NAN_SETTER(HandleSetters);
