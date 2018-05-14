@@ -105,7 +105,7 @@ class FFEncode {
    * @param {Number} target_height How tall to make the image on the canvas
    * @param {Number} opacity (0-1) How transparent (1 == opaque)
    */
-  DrawRGBAImage(buf, width, height, x, y, target_width, target_height, opacity = 1) {
+  drawRGBAImage(buf, width, height, x, y, target_width, target_height, opacity = 1) {
     if (!(buf instanceof Buffer)) {
       throw new Error("Argument must be a buffer.");
     }

@@ -22,7 +22,7 @@ for (var i = 0; i < 10; i++) {
   fencoder.centerRGBAImage(mountainImg.rgba, mountainImg.width, mountainImg.height);
   fencoder.centerRGBAImage(balloonImg.rgba, balloonImg.width, balloonImg.height);
   fencoder.centerRGBAImage(pencilsImg.rgba, pencilsImg.width, pencilsImg.height);  
-  fencoder.DrawRGBAImage(mouseImg.rgba, mouseImg.width, mouseImg.height, 280, 50, 50, 50, 0.5);
+  fencoder.drawRGBAImage(mouseImg.rgba, mouseImg.width, mouseImg.height, 280, 50, 50, 50, 0.5);
   //var frameBuf = fencoder.getPNGOfFrame();
   fencoder.closeFrame();
   console.log("FRAME TIME: ", (new Date()) - nw);
