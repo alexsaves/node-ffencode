@@ -57,9 +57,7 @@ namespace utils
     int src_x_4 = 0;
 
     float imgw = (float)image_width;
-    float imgh = (float)image_height;
-    float wherex = (float)where.x;
-    float wherey = (float)where.y;   
+    float imgh = (float)image_height; 
     float wherew = (float)where.w;
     float whereh = (float)where.h; 
     float x_prog;

@@ -53,7 +53,7 @@ class FFEncode {
       throw new Error("Buffer length does not match provided width and height * 4 (not an RGBA array?)");
     }
     var nw = new Date();
-    var res = this._enc.getBufferFromFrame(buf, width, height);
+    var res = this._enc.getPNGFromFrame(buf, width, height);
     console.log("TIME:", (new Date()) - nw);
     return res;
   }

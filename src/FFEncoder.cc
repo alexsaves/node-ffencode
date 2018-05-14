@@ -1,4 +1,5 @@
 #include "FFEncoder.h"
+#include "lodepng.h"
 #include <v8.h>
 #include <v8-platform.h>
 #include <cstring>
@@ -95,11 +96,11 @@ NAN_METHOD(FFEncoder::GetBufferFromFrame)
   utils::Rectangle targetRect = utils::size_image_to_fit(self->width, self->height, frame_width, frame_height);
   //std::cout << "Target Movie: " << self->width << ", " << self->height << "\n";
   //std::cout << "Frame: " << frame_width << ", " << frame_height << "\n";
-  std::cout << "Rect Final: " << targetRect.x << ", " << targetRect.y << ", " << targetRect.w << ", " << targetRect.h << " \n";
+  //std::cout << "Rect Final: " << targetRect.x << ", " << targetRect.y << ", " << targetRect.w << ", " << targetRect.h << " \n";
 
   v8::Local<v8::Object> bufferObj = info[0]->ToObject();
   char* bufferData = node::Buffer::Data(bufferObj);
-  size_t bufferLength = node::Buffer::Length(bufferObj);
+  //size_t bufferLength = node::Buffer::Length(bufferObj);
   
   int pix_count = self->width * self->height;
   int frame_len = pix_count * 4;
@@ -111,16 +112,6 @@ NAN_METHOD(FFEncoder::GetBufferFromFrame)
   // Blit and size the image onto the frame
   utils::blt_image_onto_frame(out_img, self->width, self->height, bufferData, frame_width, frame_height, targetRect);
 
-/*
-  char * retval = new char[bufferLength];
-  for(unsigned int i = 0; i < bufferLength; i++ ) {
-      unsigned char c = (unsigned char)bufferData[i];
-      int v = (int)c;
-      v = v / 2;
-      //std::cout << "FENCODE VALS: " << v << " \n";
-      retval[i] = (char)v;
-  }
-*/
   info.GetReturnValue().Set(Nan::NewBuffer(out_img, frame_len).ToLocalChecked());
 }
 
@@ -129,27 +120,35 @@ NAN_METHOD(FFEncoder::GetPNGFromFrame)
 {
   // unwrap this Vector
   FFEncoder *self = Nan::ObjectWrap::Unwrap<FFEncoder>(info.This());
-/*
-  if (!Nan::New(FFEncoder::constructor)->HasInstance(info[0]))
-  {
-    return Nan::ThrowError(Nan::New("Vector::Add - expected argument to be instance of Vector").ToLocalChecked());
-  }
-  // unwrap the Vector passed as argument
-  Vector *otherVec = Nan::ObjectWrap::Unwrap<Vector>(info[0]->ToObject());
+  int frame_width = info[1]->IntegerValue();
+  int frame_height = info[2]->IntegerValue();
+  utils::Rectangle targetRect = utils::size_image_to_fit(self->width, self->height, frame_width, frame_height);
+  //std::cout << "Target Movie: " << self->width << ", " << self->height << "\n";
+  //std::cout << "Frame: " << frame_width << ", " << frame_height << "\n";
+  //std::cout << "Rect Final: " << targetRect.x << ", " << targetRect.y << ", " << targetRect.w << ", " << targetRect.h << " \n";
 
-  // specify argument counts and constructor arguments
-  const int argc = 3;
-  v8::Local<v8::Value> argv[argc] = {
-      Nan::New(self->x + otherVec->x),
-      Nan::New(self->y + otherVec->y),
-      Nan::New(self->z + otherVec->z)};
+  v8::Local<v8::Object> bufferObj = info[0]->ToObject();
+  char* bufferData = node::Buffer::Data(bufferObj);
+  //size_t bufferLength = node::Buffer::Length(bufferObj);
+  
+  int pix_count = self->width * self->height;
+  int frame_len = pix_count * 4;
 
-  // get a local handle to our constructor function
-  v8::Local<v8::Function> constructorFunc = Nan::New(Vector::constructor)->GetFunction();
-  // create a new JS instance from arguments
-  v8::Local<v8::Object> jsSumVec = Nan::NewInstance(constructorFunc, argc, argv).ToLocalChecked();
+  // Set up a copy of the blank slate
+  unsigned char * out_img = new unsigned char[frame_len];
+  memcpy ( &out_img, &self->blank_slate, sizeof(self->blank_slate) );
 
-  info.GetReturnValue().Set(jsSumVec);*/
+  // Blit and size the image onto the frame
+  utils::blt_image_onto_frame(out_img, self->width, self->height, bufferData, frame_width, frame_height, targetRect);
+
+  // ENCODE AS PNG
+  std::vector<unsigned char> outVect;
+  lodepng::encode(outVect, out_img, (unsigned)self->width, (unsigned)self->height);
+  unsigned char* myArr = new unsigned char[outVect.size()];
+  std::copy(outVect.begin(), outVect.end(), myArr);
+  delete [] out_img;
+
+  info.GetReturnValue().Set(Nan::NewBuffer(myArr, frame_len).ToLocalChecked());
 }
 
 // Add a frame to the video stream
