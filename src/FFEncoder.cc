@@ -95,7 +95,7 @@ NAN_METHOD(FFEncoder::GetBufferFromFrame)
   utils::Rectangle targetRect = utils::size_image_to_fit(self->width, self->height, frame_width, frame_height);
   //std::cout << "Target Movie: " << self->width << ", " << self->height << "\n";
   //std::cout << "Frame: " << frame_width << ", " << frame_height << "\n";
-  //std::cout << "Rect Final: " << targetRect.x << ", " << targetRect.y << ", " << targetRect.w << ", " << targetRect.h << " \n";
+  std::cout << "Rect Final: " << targetRect.x << ", " << targetRect.y << ", " << targetRect.w << ", " << targetRect.h << " \n";
 
   v8::Local<v8::Object> bufferObj = info[0]->ToObject();
   char* bufferData = node::Buffer::Data(bufferObj);
@@ -110,9 +110,6 @@ NAN_METHOD(FFEncoder::GetBufferFromFrame)
 
   // Blit and size the image onto the frame
   utils::blt_image_onto_frame(out_img, self->width, self->height, bufferData, frame_width, frame_height, targetRect);
-
-  //std::cout << "Final Byte Len: " << frame_len << ", " << destination_size << "\n";
-  //strncpy(out_img, self->blank_slate, frame_len);
 
 /*
   char * retval = new char[bufferLength];
