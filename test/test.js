@@ -1,37 +1,32 @@
-const FFencode = require('../index')
-const MakeFakeImageRGBABuffer = require('./lib/utils').MakeFakeImageRGBABuffer
-const Jimp = require('jimp');
+const FFencode = require('../index');
+const MakeFakeImageRGBABuffer = require('./lib/utils').MakeFakeImageRGBABuffer;
+const WriteImageToFile = require('./lib/utils').WriteImageToFile;
+const ReadImageFromFile = require('./lib/utils').ReadImageFromFile;
 const fs = require('fs');
 
-var size = {
-  width: 1000,
-  height: 500
+const video_size = {
+  width: 500,
+  height: 200
 };
-var fencoder = new FFencode(size.width, size.height, 5, "./out.mp4");
-Jimp.read("./test/mouse.png").then(function (mouseimg) {
 
-  Jimp.read("./test/pencils_small.png").then(function (oimg) {
-    let W = fencoder.width;
-    let H = fencoder.height;
-    for (var i = 0; i < 10; i++) {
-    //while (true) {
-      var nw = new Date();
-      fencoder.openFrame();
-      fencoder.centerRGBAImage(oimg.bitmap.data, oimg.bitmap.width, oimg.bitmap.height);
-      fencoder.DrawRGBAImage(mouseimg.bitmap.data, mouseimg.bitmap.width, mouseimg.bitmap.height, 280, 50, 50, 50, 0.5);
-      var frameBuf = fencoder.getPNGOfFrame();
-      fencoder.closeFrame();
-      console.log("FRAME TIME: ", (new Date()) - nw);
-      fs.writeFileSync("./out_" + i + ".png", frameBuf);
-    }
+const fencoder = new FFencode(video_size.width, video_size.height, 5, "./out.mp4");
+const mouseImg = ReadImageFromFile("./test/mouse_98_98.df");
+const mountainImg = ReadImageFromFile("./test/mountain_1600_640.df");
+const pencilsImg = ReadImageFromFile("./test/pencils_1024_922.df");
+const balloonImg = ReadImageFromFile("./test/balloon_250_167.df");
 
-    fencoder.finalize();
-  }).catch(function (err) {
-    // handle an exception
-    console.log(err);
-  });
+for (var i = 0; i < 10; i++) {
+  //while (true) {
+  var nw = new Date();
+  fencoder.openFrame();
+  fencoder.centerRGBAImage(mountainImg.rgba, mountainImg.width, mountainImg.height);
+  fencoder.centerRGBAImage(balloonImg.rgba, balloonImg.width, balloonImg.height);
+  fencoder.centerRGBAImage(pencilsImg.rgba, pencilsImg.width, pencilsImg.height);  
+  fencoder.DrawRGBAImage(mouseImg.rgba, mouseImg.width, mouseImg.height, 280, 50, 50, 50, 0.5);
+  //var frameBuf = fencoder.getPNGOfFrame();
+  fencoder.closeFrame();
+  console.log("FRAME TIME: ", (new Date()) - nw);
+  //fs.writeFileSync("./out_" + i + ".png", frameBuf);
+}
 
-}).catch(function (err) {
-  // handle an exception
-  console.log(err);
-});
+fencoder.finalize();
