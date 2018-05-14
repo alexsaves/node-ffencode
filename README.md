@@ -11,7 +11,7 @@ This project is a simple Node extension for building videos in a frame-by-frame 
 todo
 
 ## Copyrights
-All code contained that is not otherwise labelled is Copyright 2018 (c), Alexei White - licensed under MIT. Some files contain the following copyright notices:
+All code contained that is not otherwise labelled is Copyright (c) 2018, Alexei White (alexei.white(at)gmail.com)- licensed under MIT. Some files contain the following copyright notices:
 
 ### LodePNG
 
@@ -27,12 +27,12 @@ Copyright (c) 2003 Michael Niedermayer
 ### libavutil
 
 Copyright (c) 2006 Mans Rullgard
-Copyright (c) 2006 Ryan Martell. (rdm4@martellventures.com)
-Copyright (c) 2006 Michael Niedermayer <michaelni@gmx.at>
+Copyright (c) 2006 Ryan Martell. (rdm4(at)martellventures.com)
+Copyright (c) 2006 Michael Niedermayer <michaelni(at)gmx.at>
 
 ### libswscale
 
-Copyright (C) 2001-2011 Michael Niedermayer <michaelni@gmx.at>
+Copyright (C) 2001-2011 Michael Niedermayer <michaelni(at)gmx.at>
 
 ### General FFmpeg Boilerplate
 
