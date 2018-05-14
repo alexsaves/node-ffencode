@@ -6,6 +6,7 @@
       "<!(node -e \"require('nan')\")"
     ],
     "sources": [
+      "src/utils.cc",
       "src/index.cc",
       "src/lodepng.cc",
       "src/FFEncoder.cc"

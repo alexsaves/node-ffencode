@@ -10,6 +10,7 @@ public:
   int width;
   int height;
   int fps;
+  char* blank_slate;
   std::string filename;
 
   static NAN_MODULE_INIT(Init);

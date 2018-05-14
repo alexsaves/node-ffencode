@@ -52,7 +52,8 @@ class FFEncode {
     if (width * height * 4 != buf.length) {
       throw new Error("Buffer length does not match provided width and height * 4 (not an RGBA array?)");
     }
-    this._enc.addFrame(buf);
+    var res = this._enc.getBufferFromFrame(buf, width, height);
+    return res;
   }
 
   /**
