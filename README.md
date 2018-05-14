@@ -1,5 +1,11 @@
 # node-ffencode
-Frame-by-frame Video Encoding Via FFMPeg
+This project is a simple Node extension for building videos in a frame-by-frame manner from RGBA buffers using FFmpeg.
+
+## Features:
+ * Scaling and positioning of images onto a canvas
+ * Add watermarks or other sprites (with opacity)
+ * Encode frames into a video
+ * Get the frame data back into Node as an RGBA Buffer or PNG Buffer.
 
 ## Example
 todo
@@ -28,7 +34,9 @@ Copyright (c) 2006 Michael Niedermayer <michaelni@gmx.at>
 
 Copyright (C) 2001-2011 Michael Niedermayer <michaelni@gmx.at>
 
-### General FFMPeg Boilerplate
+### General FFmpeg Boilerplate
+
+FFmpeg information can be found at https://www.ffmpeg.org/
 
 FFmpeg is free software; you can redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software Foundation; either version 2.1 of the License, or (at your option) any later version.
  
