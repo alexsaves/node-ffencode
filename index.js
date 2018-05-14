@@ -35,13 +35,21 @@ class FFEncode {
     this._enc = new FFEncoder(this.width, this.height, this.fps, this.filename);
   }
 
+  openFrame() {
+    this._enc.openFrame();
+  }
+
+  closeFrame() {
+    this._enc.closeFrame();
+  }
+
   /**
    * Add a frame for the video
    * @param {Buffer} buf RGBA Pixel buffer
    * @param {Number} width Width of image (must be <= movie width)
    * @param {Number} height Height of image (must be <= movie height)
    */
-  addRGBABufferFrame(buf, width, height) {
+  centerRGBAImage(buf, width, height) {
     if (!(buf instanceof Buffer)) {
       throw new Error("Argument must be a buffer.");
     }
@@ -53,9 +61,26 @@ class FFEncode {
       throw new Error("Buffer length does not match provided width and height * 4 (not an RGBA array?)");
     }
     var nw = new Date();
-    var res = this._enc.getPNGFromFrame(buf, width, height);
+    this._enc.centerRGBAImage(buf, width, height);
     console.log("TIME:", (new Date()) - nw);
-    return res;
+  }
+
+  getPNGOfFrame() {
+    return this._enc.getPNGOfFrame();
+  }
+
+  DrawRGBAImage(buf, width, height, x, y, target_width, target_height) {
+    if (!(buf instanceof Buffer)) {
+      throw new Error("Argument must be a buffer.");
+    }
+    if (isNaN(width) || isNaN(height)) {
+      width = this.width;
+      height = this.height;
+    }
+    if (width * height * 4 != buf.length) {
+      throw new Error("Buffer length does not match provided width and height * 4 (not an RGBA array?)");
+    }
+    this._enc.drawRGBAImage(buf, width, height, x, y, target_width, target_height);
   }
 
   /**

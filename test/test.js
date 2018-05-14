@@ -13,8 +13,14 @@ Jimp.read("./test/mouse.png").then(function (mouseimg) {
   Jimp.read("./test/mnts.jpg").then(function (oimg) {
     let W = fencoder.width;
     let H = fencoder.height;
-    var frameBuf = fencoder.addRGBABufferFrame(oimg.bitmap.data, oimg.bitmap.width, oimg.bitmap.height);
+    fencoder.openFrame();
+    fencoder.centerRGBAImage(oimg.bitmap.data, oimg.bitmap.width, oimg.bitmap.height);
+    fencoder.DrawRGBAImage(mouseimg.bitmap.data, mouseimg.bitmap.width, mouseimg.bitmap.height, 300, 50, 25, 25);
+    var frameBuf = fencoder.getPNGOfFrame();
     fs.writeFileSync("./out.png", frameBuf);
+    //var frameBuf = fencoder.addRGBABufferFrame(oimg.bitmap.data, oimg.bitmap.width, oimg.bitmap.height);
+    fencoder.closeFrame();
+    
 
     fencoder.finalize();
   }).catch(function (err) {

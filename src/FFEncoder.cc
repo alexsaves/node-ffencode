@@ -30,6 +30,13 @@ NAN_MODULE_INIT(FFEncoder::Init)
   Nan::SetAccessor(ctor->InstanceTemplate(), Nan::New("fps").ToLocalChecked(), FFEncoder::HandleGetters, FFEncoder::HandleSetters);
   Nan::SetAccessor(ctor->InstanceTemplate(), Nan::New("filename").ToLocalChecked(), FFEncoder::HandleGetters, FFEncoder::HandleSetters);
 
+  Nan::SetPrototypeMethod(ctor, "openFrame", OpenFrame);
+  Nan::SetPrototypeMethod(ctor, "closeFrame", CloseFrame);
+  Nan::SetPrototypeMethod(ctor, "centerRGBAImage", CenterRGBAImage);
+  Nan::SetPrototypeMethod(ctor, "getPNGOfFrame", GetPNGOfFrame);
+  Nan::SetPrototypeMethod(ctor, "drawRGBAImage", DrawRGBAImage);
+  
+  
   Nan::SetPrototypeMethod(ctor, "addFrame", AddFrame);
   Nan::SetPrototypeMethod(ctor, "getPNGFromFrame", GetPNGFromFrame);
   Nan::SetPrototypeMethod(ctor, "getBufferFromFrame", GetBufferFromFrame);
@@ -68,6 +75,9 @@ NAN_METHOD(FFEncoder::New)
   vec->width = info[0]->IntegerValue();
   vec->height = info[1]->IntegerValue();
   vec->fps = info[2]->IntegerValue();
+  vec->isopen = 0;
+  vec->pix_count = vec->width * vec->height;
+  vec->frame_len = vec->pix_count * 4;
   vec->filename = *v8::String::Utf8Value(isolate, info[3]);
 
   int pix_count = vec->width * vec->height;
@@ -84,6 +94,86 @@ NAN_METHOD(FFEncoder::New)
 
   // Return the wrapped javascript instance
   info.GetReturnValue().Set(info.Holder());
+}
+
+// Start a frame 
+NAN_METHOD(FFEncoder::OpenFrame)
+{
+  FFEncoder *self = Nan::ObjectWrap::Unwrap<FFEncoder>(info.This());
+  if (self->isopen != 0)
+  {
+    return Nan::ThrowError(Nan::New("FFEncoder::OpenFrame - frame was already open").ToLocalChecked());
+  }
+  self->isopen = 1;
+
+  // Set up a copy of the blank slate
+  self->current_frame = new char[self->frame_len];
+  memcpy ( &self->current_frame, &self->blank_slate, sizeof(self->blank_slate) );
+}
+
+// Close a frame 
+NAN_METHOD(FFEncoder::CloseFrame)
+{
+  FFEncoder *self = Nan::ObjectWrap::Unwrap<FFEncoder>(info.This());
+  if (self->isopen != 1)
+  {
+    return Nan::ThrowError(Nan::New("FFEncoder::OpenFrame - frame was already closed").ToLocalChecked());
+  }
+  self->isopen = 0;
+  delete [] self->current_frame;
+}
+
+// Get a fully realized frame of video in the form of an RGBA Buffer
+NAN_METHOD(FFEncoder::CenterRGBAImage)
+{
+  // unwrap this Vector
+  FFEncoder *self = Nan::ObjectWrap::Unwrap<FFEncoder>(info.This());
+  int frame_width = info[1]->IntegerValue();
+  int frame_height = info[2]->IntegerValue();
+  utils::Rectangle targetRect = utils::size_image_to_fit(self->width, self->height, frame_width, frame_height);
+  
+  v8::Local<v8::Object> bufferObj = info[0]->ToObject();
+  char* bufferData = node::Buffer::Data(bufferObj);
+  
+  // Blit and size the image onto the frame
+  utils::blt_image_onto_frame(self->current_frame, self->width, self->height, bufferData, frame_width, frame_height, targetRect);
+
+  // TODO: clean up bufferData?
+  //delete [] bufferData;
+}
+
+// Draw an image at a specific place
+NAN_METHOD(FFEncoder::DrawRGBAImage) 
+{
+  FFEncoder *self = Nan::ObjectWrap::Unwrap<FFEncoder>(info.This());
+  int frame_width = info[1]->IntegerValue();
+  int frame_height = info[2]->IntegerValue();
+  utils::Rectangle targetRect;
+  targetRect.x = info[3]->IntegerValue();
+  targetRect.y = info[4]->IntegerValue();
+  targetRect.w = info[5]->IntegerValue();
+  targetRect.h = info[6]->IntegerValue();
+  v8::Local<v8::Object> bufferObj = info[0]->ToObject();
+  char* bufferData = node::Buffer::Data(bufferObj);
+  // Blit and size the image onto the frame
+  utils::blt_image_onto_frame(self->current_frame, self->width, self->height, bufferData, frame_width, frame_height, targetRect);
+}
+
+// Get a PNG of the current frame
+NAN_METHOD(FFEncoder::GetPNGOfFrame) 
+{
+  FFEncoder *self = Nan::ObjectWrap::Unwrap<FFEncoder>(info.This());
+  unsigned char* convert_var = new unsigned char[self->frame_len];
+  memcpy ( &convert_var, &self->current_frame, sizeof(self->current_frame) );
+
+  // ENCODE AS PNG
+  std::vector<unsigned char> outVect;
+  lodepng::encode(outVect, convert_var, (unsigned)self->width, (unsigned)self->height);
+  char* myArr = new char[outVect.size()];
+  std::copy(outVect.begin(), outVect.end(), myArr);
+  //delete [] convert_var;
+
+  info.GetReturnValue().Set(Nan::NewBuffer(myArr, outVect.size()).ToLocalChecked());
 }
 
 // Get a fully realized frame of video in the form of an RGBA Buffer
