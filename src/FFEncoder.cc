@@ -135,20 +135,24 @@ NAN_METHOD(FFEncoder::GetPNGFromFrame)
   int frame_len = pix_count * 4;
 
   // Set up a copy of the blank slate
-  unsigned char * out_img = new unsigned char[frame_len];
+  char * out_img = new char[frame_len];
   memcpy ( &out_img, &self->blank_slate, sizeof(self->blank_slate) );
 
   // Blit and size the image onto the frame
   utils::blt_image_onto_frame(out_img, self->width, self->height, bufferData, frame_width, frame_height, targetRect);
 
+  unsigned char* convert_var = new unsigned char[frame_len];
+  memcpy ( &convert_var, &out_img, sizeof(out_img) );
+
   // ENCODE AS PNG
   std::vector<unsigned char> outVect;
-  lodepng::encode(outVect, out_img, (unsigned)self->width, (unsigned)self->height);
-  unsigned char* myArr = new unsigned char[outVect.size()];
+  lodepng::encode(outVect, convert_var, (unsigned)self->width, (unsigned)self->height);
+  char* myArr = new char[outVect.size()];
   std::copy(outVect.begin(), outVect.end(), myArr);
   delete [] out_img;
+  //delete [] convert_var;
 
-  info.GetReturnValue().Set(Nan::NewBuffer(myArr, frame_len).ToLocalChecked());
+  info.GetReturnValue().Set(Nan::NewBuffer(myArr, outVect.size()).ToLocalChecked());
 }
 
 // Add a frame to the video stream

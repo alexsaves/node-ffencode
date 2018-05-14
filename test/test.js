@@ -4,35 +4,24 @@ const Jimp = require('jimp');
 const fs = require('fs');
 
 var size = {
-  width: 200,
-  height: 100
+  width: 600,
+  height: 300
 };
 var fencoder = new FFencode(size.width, size.height, 5, "./out.mp4");
+Jimp.read("./test/mouse.png").then(function (mouseimg) {
 
-Jimp.read("./test/pencils_small.png").then(function (oimg) {
-  let W = fencoder.width;
-  let H = fencoder.height;
-  var frameBuf = fencoder.addRGBABufferFrame(oimg.bitmap.data, oimg.bitmap.width, oimg.bitmap.height);
-  fs.writeFileSync("./out.png", frameBuf);
-  /*var newImg = new Jimp(W, H, function (err, image) {
-    for (let y = 0; y < H; y++) {
-      for (let x = 0; x < W; x++) {
-        let offset = ((y * W) + x) * 4;
-        let r = frameBuf.readUInt8(offset);
-        let g = frameBuf.readUInt8(offset + 1);
-        let b = frameBuf.readUInt8(offset + 2);
-        let a = frameBuf.readUInt8(offset + 3)
-        image.setPixelColor(Jimp.rgbaToInt(r, g, b, a), x, y);
-      }
-    }
-    image.write("./out.jpg");
-  });*/
-  /*for (let i = 0; i < 5; i++) {
-    fencoder.addRGBABufferFrame(MakeFakeImageRGBABuffer(size.width, size.height));
-    console.log(`Added frame ${i}.`);
-  }*/
+  Jimp.read("./test/mnts.jpg").then(function (oimg) {
+    let W = fencoder.width;
+    let H = fencoder.height;
+    var frameBuf = fencoder.addRGBABufferFrame(oimg.bitmap.data, oimg.bitmap.width, oimg.bitmap.height);
+    fs.writeFileSync("./out.png", frameBuf);
 
-  fencoder.finalize();
+    fencoder.finalize();
+  }).catch(function (err) {
+    // handle an exception
+    console.log(err);
+  });
+
 }).catch(function (err) {
   // handle an exception
   console.log(err);

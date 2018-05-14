@@ -91,29 +91,28 @@ namespace utils
     int gf;
     int bf;
     int af;
+    int dest_offset;
     for (int y = where.y; y < where.y + where.h; y++) {      
       for (int x = where.x; x < where.x + where.w; x++) {    
-        
+        // Find the precise position to sample
         src_x = ((float)(x - where.x) / wherew) * imgw;
         src_y = ((float)(y - where.y) / whereh) * imgh;
 
         // Figure out the four corners
-        src_x_1 = (int)fmin(imgw - 1, fmax(1, floor(src_x)));
-        src_y_1 = (int)fmin(imgh - 1, fmax(1, floor(src_y)));
-        src_x_2 = (int)fmin(imgw - 1, fmax(1, ceil(src_x)));
+        src_x_1 = (int)fmin(imgw - 1, fmax(0, floor(src_x)));
+        src_y_1 = (int)fmin(imgh - 1, fmax(0, floor(src_y)));
+        src_x_2 = (int)fmin(imgw - 1, fmax(0, ceil(src_x)));
         src_y_2 = src_y_1;
         src_x_3 = src_x_1;
-        src_y_3 = (int)fmin(imgh - 1, fmax(1, ceil(src_y)));
+        src_y_3 = (int)fmin(imgh - 1, fmax(0, ceil(src_y)));
         src_x_4 = src_x_2;
         src_y_4 = src_y_3;
 
         x_prog = 1.0 - (src_x - (float)floor(src_x));
         y_prog = 1.0 - (src_y - (float)floor(src_y));
 
-        //std::cout << "x: " << src_x << ", " << src_y << " - prog: " << x_prog << ", " << y_prog << "\n";
-
         src_offset = ((src_y_1 * image_width) + src_x_1) * 4;
-
+        
         r1 = (float)(int)(unsigned char)image[src_offset++];
         g1 = (float)(int)(unsigned char)image[src_offset++];
         b1 = (float)(int)(unsigned char)image[src_offset++];
@@ -158,11 +157,7 @@ namespace utils
         bf = (int)((bt * y_prog) + (bb * (1-y_prog)));
         af = (int)((at * y_prog) + (ab * (1-y_prog)));
 
-        int dest_offset = ((y * frame_width) + x) * 4;
-
-        /*if (y == 0) {
-          std::cout << "dest_offset: " << dest_offset << " - r: " << rf << " g: " << gf << " b: " << bf << " a: " << af << "\n";
-        }*/
+        dest_offset = ((y * frame_width) + x) * 4;
 
         base_frame[dest_offset++] = (char)rf;
         base_frame[dest_offset++] = (char)gf;
