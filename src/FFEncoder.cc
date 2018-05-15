@@ -40,18 +40,6 @@
 #include <stdio.h>
 #include <string.h>
 
-// FFMPEG includes
-#ifdef __cplusplus
-extern "C" {
-#endif
-	#include "libavcodec/avcodec.h"
-	#include "libavutil/opt.h"
-	#include "libavutil/imgutils.h"
-	#include "libswscale/swscale.h"
-#ifdef __cplusplus
-}
-#endif
-
 Nan::Persistent<v8::FunctionTemplate> FFEncoder::constructor;
 
 // Initializer ********
