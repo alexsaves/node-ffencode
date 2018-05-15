@@ -23,42 +23,35 @@
 * SOFTWARE.
 */
 
-#ifndef FFENCODER_H
-#define FFENCODER_H
-
-#include <nan.h>
-#include <string>
-#include <stdio.h>
-#include <stdlib.h>
 #include "cencode.h"
+#include <cstring>
+#include <cstdlib>
+#include <stddef.h>
+#include <node.h>
+#include <math.h>
+#include <iostream>
+#include <stdint.h>
+#include <stdlib.h>
+#include "utils.h"
+#include <stdio.h>
+#include <string.h>
 
-class FFEncoder : public Nan::ObjectWrap
-{
-public:
-  int width;
-  int height;
-  int fps;
-  int isopen;
-  int pix_count;
-  int frame_len;
-  char* blank_slate;
-  char* current_frame;
-  std::string filename;
-
-  static NAN_MODULE_INIT(Init);
-  static NAN_METHOD(New);
-  static NAN_METHOD(OpenFrame);
-  static NAN_METHOD(CloseFrame);
-  static NAN_METHOD(CenterRGBAImage);
-  static NAN_METHOD(DrawRGBAImage);
-  static NAN_METHOD(GetPNGOfFrame);
-  static NAN_METHOD(GetBufferOfFrame);
-  static NAN_METHOD(Dispose);
-
-  static NAN_GETTER(HandleGetters);
-  static NAN_SETTER(HandleSetters);
-
-  static Nan::Persistent<v8::FunctionTemplate> constructor;
-};
-
+// FFMPEG includes
+#ifdef __cplusplus
+extern "C" {
 #endif
+	#include "libavcodec/avcodec.h"
+	#include "libavutil/opt.h"
+	#include "libavutil/imgutils.h"
+	#include "libswscale/swscale.h"
+#ifdef __cplusplus
+}
+#endif
+
+// Date constructor
+Cencode::Cencode()
+{
+    m_num_frames = 0;
+    //AVCodec *codec = avcodec_find_encoder_by_name("h263p");
+    std::cout << "* Cencode init\n";
+}

@@ -23,42 +23,37 @@
 * SOFTWARE.
 */
 
-#ifndef FFENCODER_H
-#define FFENCODER_H
+#ifndef CENCODE_H
+#define CENCODE_H
 
-#include <nan.h>
 #include <string>
 #include <stdio.h>
 #include <stdlib.h>
-#include "cencode.h"
 
-class FFEncoder : public Nan::ObjectWrap
+// FFMPEG includes
+#ifdef __cplusplus
+extern "C" {
+#endif
+	#include "libavcodec/avcodec.h"
+	#include "libavutil/opt.h"
+	#include "libavutil/imgutils.h"
+	#include "libswscale/swscale.h"
+#ifdef __cplusplus
+}
+#endif
+
+class Cencode
 {
+private:
+  /*FILE *m_f;
+  AVCodecContext *m_c;
+  AVFrame *m_frame;
+  AVPacket *m_pkt;
+  struct SwsContext *m_sws_context;*/
+  int64_t m_num_frames;
 public:
-  int width;
-  int height;
-  int fps;
-  int isopen;
-  int pix_count;
-  int frame_len;
-  char* blank_slate;
-  char* current_frame;
-  std::string filename;
+  Cencode();
 
-  static NAN_MODULE_INIT(Init);
-  static NAN_METHOD(New);
-  static NAN_METHOD(OpenFrame);
-  static NAN_METHOD(CloseFrame);
-  static NAN_METHOD(CenterRGBAImage);
-  static NAN_METHOD(DrawRGBAImage);
-  static NAN_METHOD(GetPNGOfFrame);
-  static NAN_METHOD(GetBufferOfFrame);
-  static NAN_METHOD(Dispose);
-
-  static NAN_GETTER(HandleGetters);
-  static NAN_SETTER(HandleSetters);
-
-  static Nan::Persistent<v8::FunctionTemplate> constructor;
 };
 
 #endif

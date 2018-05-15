@@ -25,6 +25,7 @@
 
 #include "FFEncoder.h"
 #include "lodepng.h"
+#include "cencode.h"
 #include <v8.h>
 #include <v8-platform.h>
 #include <cstring>
@@ -113,7 +114,6 @@ NAN_METHOD(FFEncoder::New)
   enc->pix_count = enc->width * enc->height;
   enc->frame_len = enc->pix_count * 4;
   enc->filename = *v8::String::Utf8Value(isolate, info[3]);
-  enc->m_num_frames = 0;
 
   int pix_count = enc->width * enc->height;
   int frame_len = pix_count * 4;
@@ -126,6 +126,8 @@ NAN_METHOD(FFEncoder::New)
     _blankSlate[offset + 3] = (char)(int)255;
   }
   enc->blank_slate = _blankSlate;
+
+  //Cencode encoder;
 
   // Return the wrapped javascript instance
   info.GetReturnValue().Set(info.Holder());
