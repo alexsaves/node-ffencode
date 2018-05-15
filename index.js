@@ -81,6 +81,13 @@ class FFEncode {
   }
 
   /**
+   * Get a JPG of the current frame
+   */
+  getJPGOfFrame(quality = 75) {
+    return this._enc.getJPGOfFrame(quality);
+  }
+
+  /**
    * Get a PNG of the current frame
    */
   getPNGOfFrame() {
