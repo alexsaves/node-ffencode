@@ -13,6 +13,11 @@ todo
 ## Copyrights
 All code contained that is not otherwise labelled is Copyright (c) 2018, Alexei White (alexei.white(at)gmail.com)- licensed under MIT. Some files contain the following copyright notices:
 
+### SJPEG
+
+Copyright 2017 Google Inc.
+https://github.com/webmproject/sjpeg
+
 ### LodePNG
 
 LodePNG version 20151024
