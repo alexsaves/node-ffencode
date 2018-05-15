@@ -33,13 +33,28 @@ class FFEncode {
     this.fps = Math.max(1, Math.min(120, Math.round(fps)));
     this.filename = filename || (shortid.generate() + ".mp4");
     this._enc = new FFEncoder(this.width, this.height, this.fps, this.filename);
+    this._frameOpen = false;
   }
 
+  /**
+   * Start a new frame for rendering
+   */
   openFrame() {
+    if (this._frameOpen) {
+      throw new Error("Frame was already open.");
+    }
+    this._frameOpen = true;
     this._enc.openFrame();
   }
 
+  /**
+   * Shut down the frame and release memory
+   */
   closeFrame() {
+    if (!this._frameOpen) {
+      throw new Error("Frame was already closed.");
+    }
+    this._frameOpen = false;
     this._enc.closeFrame();
   }
 
@@ -65,11 +80,32 @@ class FFEncode {
     
   }
 
+  /**
+   * Get a PNG of the current frame
+   */
   getPNGOfFrame() {
     return this._enc.getPNGOfFrame();
   }
 
-  DrawRGBAImage(buf, width, height, x, y, target_width, target_height) {
+  /**
+   * Get a PNG of the current frame
+   */
+  getRGBABufferOfFrame() {
+    return this._enc.getBufferOfFrame();
+  }
+
+  /**
+   * Draw a sprite onto the frame
+   * @param {Buffer} buf RGBA Buffer of unsigned ints 
+   * @param {Number} width Width of the source image
+   * @param {Number} height Height of the source image
+   * @param {Number} x Where to place the image onto the canvas
+   * @param {Number} y Where to place the image onto the canvas
+   * @param {Number} target_width How wide to make the image on the canvas
+   * @param {Number} target_height How tall to make the image on the canvas
+   * @param {Number} opacity (0-1) How transparent (1 == opaque)
+   */
+  drawRGBAImage(buf, width, height, x, y, target_width, target_height, opacity = 1) {
     if (!(buf instanceof Buffer)) {
       throw new Error("Argument must be a buffer.");
     }
@@ -77,16 +113,25 @@ class FFEncode {
       width = this.width;
       height = this.height;
     }
+    x = Math.round(x);
+    y = Math.round(y);
+    if (isNaN(x) || isNaN(y)) {
+      throw new Error("Invalid x and y coordinates.");
+    }
     if (width * height * 4 != buf.length) {
       throw new Error("Buffer length does not match provided width and height * 4 (not an RGBA array?)");
     }
-    this._enc.drawRGBAImage(buf, width, height, x, y, target_width, target_height);
+    this._enc.drawRGBAImage(buf, width, height, x, y, target_width, target_height, opacity);
   }
 
   /**
    * Finish the movie off
    */
   finalize() {
+    if (this._frameOpen) {
+      this.closeFrame();
+    }
+    this._enc.dispose();
     delete this._enc;
   }
 };

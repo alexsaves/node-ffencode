@@ -9,7 +9,8 @@
       "src/utils.cc",
       "src/index.cc",
       "src/lodepng.cc",
-      "src/FFEncoder.cc"
+      "src/FFEncoder.cc",
+      "src/cencode.cc"
     ]
   }]
 }

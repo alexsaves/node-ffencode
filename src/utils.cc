@@ -1,3 +1,28 @@
+/*
+* FFEncode
+* MIT License
+* 
+* Copyright (c) 2018 Alexei White
+* 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+* 
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+* 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+
 #include "utils.h"
 #include <stddef.h>
 #include <node.h>
@@ -34,7 +59,7 @@ namespace utils
   }
 
   // Draw an image onto another image
-  void blt_image_onto_frame(char* base_frame, int frame_width, int frame_height, char* image, int image_width, int image_height, Rectangle where) {
+  void blt_image_onto_frame(char* base_frame, int frame_width, int frame_height, char* image, int image_width, int image_height, Rectangle where, float opacity) {
     //std::cout << "Rect Final: " << where.x << ", " << where.y << ", " << where.w << ", " << where.h << " | frame: " << image_width << ", " << image_height << "\n";
     
     float src_y = 0;
@@ -166,7 +191,7 @@ namespace utils
 
             dest_offset = ((y * frame_width) + x) * 4;
 
-            if (af == 255) {
+            if (af == 255 && opacity == 1) {
               base_frame[dest_offset++] = (char)rf;
               base_frame[dest_offset++] = (char)gf;
               base_frame[dest_offset++] = (char)bf;
@@ -176,7 +201,7 @@ namespace utils
               src_g = (float)(int)(unsigned char)base_frame[dest_offset + 1];
               src_b = (float)(int)(unsigned char)base_frame[dest_offset + 2];
               src_a = (float)(int)(unsigned char)base_frame[dest_offset + 3];
-              opac_prog = (float)af / 255;
+              opac_prog = ((float)af / 255) * opacity;
               rf =  (int)((((float)rf * opac_prog) + (src_r * (1-opac_prog))));
               gf =  (int)((((float)gf * opac_prog) + (src_g * (1-opac_prog))));
               bf =  (int)((((float)bf * opac_prog) + (src_b * (1-opac_prog))));

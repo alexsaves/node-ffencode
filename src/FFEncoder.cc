@@ -1,5 +1,31 @@
+/*
+* FFEncode
+* MIT License
+* 
+* Copyright (c) 2018 Alexei White
+* 
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+* 
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+* 
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+
 #include "FFEncoder.h"
 #include "lodepng.h"
+#include "cencode.h"
 #include <v8.h>
 #include <v8-platform.h>
 #include <cstring>
@@ -13,6 +39,18 @@
 #include "utils.h"
 #include <stdio.h>
 #include <string.h>
+
+// FFMPEG includes
+#ifdef __cplusplus
+extern "C" {
+#endif
+	#include "libavcodec/avcodec.h"
+	#include "libavutil/opt.h"
+	#include "libavutil/imgutils.h"
+	#include "libswscale/swscale.h"
+#ifdef __cplusplus
+}
+#endif
 
 Nan::Persistent<v8::FunctionTemplate> FFEncoder::constructor;
 
@@ -35,7 +73,8 @@ NAN_MODULE_INIT(FFEncoder::Init)
   Nan::SetPrototypeMethod(ctor, "centerRGBAImage", CenterRGBAImage);
   Nan::SetPrototypeMethod(ctor, "getPNGOfFrame", GetPNGOfFrame);
   Nan::SetPrototypeMethod(ctor, "drawRGBAImage", DrawRGBAImage);
-  
+  Nan::SetPrototypeMethod(ctor, "getBufferOfFrame", GetBufferOfFrame);
+  Nan::SetPrototypeMethod(ctor, "dispose", Dispose);
 
   target->Set(Nan::New("FFEncoder").ToLocalChecked(), ctor->GetFunction());
 }
@@ -64,19 +103,19 @@ NAN_METHOD(FFEncoder::New)
   }
 
   // create a new instance and wrap our javascript instance
-  FFEncoder *vec = new FFEncoder();
-  vec->Wrap(info.Holder());
+  FFEncoder *enc = new FFEncoder();
+  enc->Wrap(info.Holder());
 
   // initialize it's values
-  vec->width = info[0]->IntegerValue();
-  vec->height = info[1]->IntegerValue();
-  vec->fps = info[2]->IntegerValue();
-  vec->isopen = 0;
-  vec->pix_count = vec->width * vec->height;
-  vec->frame_len = vec->pix_count * 4;
-  vec->filename = *v8::String::Utf8Value(isolate, info[3]);
+  enc->width = info[0]->IntegerValue();
+  enc->height = info[1]->IntegerValue();
+  enc->fps = info[2]->IntegerValue();
+  enc->isopen = 0;
+  enc->pix_count = enc->width * enc->height;
+  enc->frame_len = enc->pix_count * 4;
+  enc->filename = *v8::String::Utf8Value(isolate, info[3]);
 
-  int pix_count = vec->width * vec->height;
+  int pix_count = enc->width * enc->height;
   int frame_len = pix_count * 4;
   char* _blankSlate = new char[frame_len];
   for (int i = 0; i < pix_count; i++) {
@@ -86,10 +125,19 @@ NAN_METHOD(FFEncoder::New)
     _blankSlate[offset + 2] = (char)(int)0;
     _blankSlate[offset + 3] = (char)(int)255;
   }
-  vec->blank_slate = _blankSlate;
+  enc->blank_slate = _blankSlate;
+
+  //Cencode encoder;
 
   // Return the wrapped javascript instance
   info.GetReturnValue().Set(info.Holder());
+}
+
+// Free up memory
+NAN_METHOD(FFEncoder::Dispose)
+{
+  //FFEncoder *self = Nan::ObjectWrap::Unwrap<FFEncoder>(info.This());
+  //delete [] self->blank_slate;
 }
 
 // Start a frame 
@@ -132,10 +180,7 @@ NAN_METHOD(FFEncoder::CenterRGBAImage)
   char* bufferData = node::Buffer::Data(bufferObj);
   
   // Blit and size the image onto the frame
-  utils::blt_image_onto_frame(self->current_frame, self->width, self->height, bufferData, frame_width, frame_height, targetRect);
-
-  // TODO: clean up bufferData?
-  //delete [] bufferData;
+  utils::blt_image_onto_frame(self->current_frame, self->width, self->height, bufferData, frame_width, frame_height, targetRect, 1);
 }
 
 // Draw an image at a specific place
@@ -149,10 +194,11 @@ NAN_METHOD(FFEncoder::DrawRGBAImage)
   targetRect.y = info[4]->IntegerValue();
   targetRect.w = info[5]->IntegerValue();
   targetRect.h = info[6]->IntegerValue();
+  float opacity = (float)info[7]->NumberValue();
   v8::Local<v8::Object> bufferObj = info[0]->ToObject();
   char* bufferData = node::Buffer::Data(bufferObj);
   // Blit and size the image onto the frame
-  utils::blt_image_onto_frame(self->current_frame, self->width, self->height, bufferData, frame_width, frame_height, targetRect);
+  utils::blt_image_onto_frame(self->current_frame, self->width, self->height, bufferData, frame_width, frame_height, targetRect, opacity);
 }
 
 // Get a PNG of the current frame
@@ -167,9 +213,15 @@ NAN_METHOD(FFEncoder::GetPNGOfFrame)
   lodepng::encode(outVect, convert_var, (unsigned)self->width, (unsigned)self->height);
   char* myArr = new char[outVect.size()];
   std::copy(outVect.begin(), outVect.end(), myArr);
-  //delete [] convert_var;
 
   info.GetReturnValue().Set(Nan::NewBuffer(myArr, outVect.size()).ToLocalChecked());
+}
+
+// Get an uncompressed RGBA buffer of the current frame
+NAN_METHOD(FFEncoder::GetBufferOfFrame) 
+{
+  FFEncoder *self = Nan::ObjectWrap::Unwrap<FFEncoder>(info.This());
+  info.GetReturnValue().Set(Nan::NewBuffer(self->current_frame, self->frame_len).ToLocalChecked());
 }
 
 // Property getters *****************
