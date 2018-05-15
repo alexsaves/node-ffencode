@@ -26,6 +26,7 @@
 #include "FFEncoder.h"
 #include "lodepng.h"
 #include "cencode.h"
+#include "jpeg/sjpeg.h"
 #include <v8.h>
 #include <v8-platform.h>
 #include <cstring>
@@ -60,6 +61,7 @@ NAN_MODULE_INIT(FFEncoder::Init)
   Nan::SetPrototypeMethod(ctor, "closeFrame", CloseFrame);
   Nan::SetPrototypeMethod(ctor, "centerRGBAImage", CenterRGBAImage);
   Nan::SetPrototypeMethod(ctor, "getPNGOfFrame", GetPNGOfFrame);
+  Nan::SetPrototypeMethod(ctor, "getJPGOfFrame", GetJPGOfFrame);
   Nan::SetPrototypeMethod(ctor, "drawRGBAImage", DrawRGBAImage);
   Nan::SetPrototypeMethod(ctor, "getBufferOfFrame", GetBufferOfFrame);
   Nan::SetPrototypeMethod(ctor, "dispose", Dispose);
@@ -105,15 +107,15 @@ NAN_METHOD(FFEncoder::New)
 
   int pix_count = enc->width * enc->height;
   int frame_len = pix_count * 4;
-  char* _blankSlate = new char[frame_len];
+  enc->blank_slate = NULL;
+  enc->blank_slate = (char*)malloc(frame_len);
   for (int i = 0; i < pix_count; i++) {
     int offset = i * 4;
-    _blankSlate[offset] = (char)(int)0;
-    _blankSlate[offset + 1] = (char)(int)0;
-    _blankSlate[offset + 2] = (char)(int)0;
-    _blankSlate[offset + 3] = (char)(int)255;
+    enc->blank_slate[offset] = (char)(int)0;
+    enc->blank_slate[offset + 1] = (char)(int)0;
+    enc->blank_slate[offset + 2] = (char)(int)0;
+    enc->blank_slate[offset + 3] = (char)(int)255;
   }
-  enc->blank_slate = _blankSlate;
 
   //Cencode encoder;
 
@@ -125,7 +127,7 @@ NAN_METHOD(FFEncoder::New)
 NAN_METHOD(FFEncoder::Dispose)
 {
   //FFEncoder *self = Nan::ObjectWrap::Unwrap<FFEncoder>(info.This());
-  //delete [] self->blank_slate;
+  //delete[] self->blank_slate;
 }
 
 // Start a frame 
@@ -139,7 +141,8 @@ NAN_METHOD(FFEncoder::OpenFrame)
   self->isopen = 1;
 
   // Set up a copy of the blank slate
-  self->current_frame = new char[self->frame_len];
+  self->current_frame = NULL;
+  self->current_frame = (char *)malloc(self->frame_len);
   memcpy ( &self->current_frame, &self->blank_slate, sizeof(self->blank_slate) );
 }
 
@@ -152,7 +155,8 @@ NAN_METHOD(FFEncoder::CloseFrame)
     return Nan::ThrowError(Nan::New("FFEncoder::OpenFrame - frame was already closed").ToLocalChecked());
   }
   self->isopen = 0;
-  delete [] self->current_frame;
+  // PRINTF OUT THE ADDRESS. GOOGLE IF THERE IS A BETTER WAY TO FREE THIS
+  free(self->current_frame);
 }
 
 // Get a fully realized frame of video in the form of an RGBA Buffer
@@ -189,6 +193,30 @@ NAN_METHOD(FFEncoder::DrawRGBAImage)
   utils::blt_image_onto_frame(self->current_frame, self->width, self->height, bufferData, frame_width, frame_height, targetRect, opacity);
 }
 
+// Get a JPG of the current frame
+NAN_METHOD(FFEncoder::GetJPGOfFrame) 
+{  
+  FFEncoder *self = Nan::ObjectWrap::Unwrap<FFEncoder>(info.This());
+  float quality = (float)info[0]->NumberValue();
+  uint8_t* convert_var = new uint8_t[self->width * self->height * 3];
+  int i = 0;
+  int j = 0;
+  while (i < self->frame_len) {
+    convert_var[j++] = self->current_frame[i++];
+    convert_var[j++] = self->current_frame[i++];
+    convert_var[j++] = self->current_frame[i++];
+    i++;
+  }
+  uint8_t* out_data = NULL;
+  size_t outbytes = SjpegCompress(convert_var, self->width, self->height, quality, &out_data);
+  char* myArr = new char[outbytes];
+  int ioutbytes = (int)outbytes;
+  for (int i = 0; i < ioutbytes; i++) {
+    myArr[i] = (char)out_data[i];
+  }
+  info.GetReturnValue().Set(Nan::NewBuffer(myArr, outbytes).ToLocalChecked());
+}
+
 // Get a PNG of the current frame
 NAN_METHOD(FFEncoder::GetPNGOfFrame) 
 {
@@ -201,6 +229,8 @@ NAN_METHOD(FFEncoder::GetPNGOfFrame)
   lodepng::encode(outVect, convert_var, (unsigned)self->width, (unsigned)self->height);
   char* myArr = new char[outVect.size()];
   std::copy(outVect.begin(), outVect.end(), myArr);
+  //outVect.clear();
+  //delete[] convert_var;
 
   info.GetReturnValue().Set(Nan::NewBuffer(myArr, outVect.size()).ToLocalChecked());
 }
@@ -209,7 +239,10 @@ NAN_METHOD(FFEncoder::GetPNGOfFrame)
 NAN_METHOD(FFEncoder::GetBufferOfFrame) 
 {
   FFEncoder *self = Nan::ObjectWrap::Unwrap<FFEncoder>(info.This());
-  info.GetReturnValue().Set(Nan::NewBuffer(self->current_frame, self->frame_len).ToLocalChecked());
+  char* buf_copy = NULL;
+  buf_copy = (char*)malloc(self->frame_len);
+  memcpy(buf_copy, &self->current_frame, sizeof(self->current_frame));
+  info.GetReturnValue().Set(Nan::NewBuffer(buf_copy, self->frame_len).ToLocalChecked());
 }
 
 // Property getters *****************
