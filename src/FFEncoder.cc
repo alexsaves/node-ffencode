@@ -102,20 +102,20 @@ NAN_METHOD(FFEncoder::New)
   }
 
   // create a new instance and wrap our javascript instance
-  FFEncoder *vec = new FFEncoder();
-  vec->Wrap(info.Holder());
+  FFEncoder *enc = new FFEncoder();
+  enc->Wrap(info.Holder());
 
   // initialize it's values
-  vec->width = info[0]->IntegerValue();
-  vec->height = info[1]->IntegerValue();
-  vec->fps = info[2]->IntegerValue();
-  vec->isopen = 0;
-  vec->pix_count = vec->width * vec->height;
-  vec->frame_len = vec->pix_count * 4;
-  vec->filename = *v8::String::Utf8Value(isolate, info[3]);
-  vec->m_num_frames = 0;
+  enc->width = info[0]->IntegerValue();
+  enc->height = info[1]->IntegerValue();
+  enc->fps = info[2]->IntegerValue();
+  enc->isopen = 0;
+  enc->pix_count = enc->width * enc->height;
+  enc->frame_len = enc->pix_count * 4;
+  enc->filename = *v8::String::Utf8Value(isolate, info[3]);
+  enc->m_num_frames = 0;
 
-  int pix_count = vec->width * vec->height;
+  int pix_count = enc->width * enc->height;
   int frame_len = pix_count * 4;
   char* _blankSlate = new char[frame_len];
   for (int i = 0; i < pix_count; i++) {
@@ -125,7 +125,7 @@ NAN_METHOD(FFEncoder::New)
     _blankSlate[offset + 2] = (char)(int)0;
     _blankSlate[offset + 3] = (char)(int)255;
   }
-  vec->blank_slate = _blankSlate;
+  enc->blank_slate = _blankSlate;
 
   // Return the wrapped javascript instance
   info.GetReturnValue().Set(info.Holder());
