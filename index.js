@@ -1,11 +1,18 @@
 const pjson = require('./package.json');
 const shortid = require('shortid');
+const path = require("path");
 const fs = require('fs');
+
+const debugBinary = path.join(__dirname, '/build/Debug/ffencode.node');
+const debugRelease = path.join(__dirname, '/build/Release/ffencode.node');
+
 var FFEncoder;
-if (fs.existsSync('./build/Debug/ffencode.node')) {
-  FFEncoder = require('./build/Debug/ffencode.node').FFEncoder
+if (fs.existsSync(debugBinary)) {
+  FFEncoder = require(debugBinary).FFEncoder
+} else if (fs.existsSync(debugRelease)) { 
+  FFEncoder = require(debugRelease).FFEncoder;
 } else {
-  FFEncoder = require('./build/Release/ffencode.node').FFEncoder;
+  throw new Error("Could not find ffencoder binaries.");
 }
 
 /**
