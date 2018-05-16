@@ -11,6 +11,7 @@ This project is a simple Node extension for building videos in a frame-by-frame 
 todo
 
 ## Copyrights
+
 All code contained that is not otherwise labelled is Copyright (c) 2018, Alexei White (alexei.white(at)gmail.com)- licensed under MIT. Some files contain the following copyright notices:
 
 ### SJPEG
