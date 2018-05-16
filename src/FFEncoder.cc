@@ -169,10 +169,11 @@ NAN_METHOD(FFEncoder::CenterRGBAImage)
   utils::Rectangle targetRect = utils::size_image_to_fit(self->width, self->height, frame_width, frame_height);
   
   v8::Local<v8::Object> bufferObj = info[0]->ToObject();
+  float opacity = (float)info[8]->NumberValue();
   char* bufferData = node::Buffer::Data(bufferObj);
   
   // Blit and size the image onto the frame
-  utils::blt_image_onto_frame(self->current_frame, self->width, self->height, bufferData, frame_width, frame_height, targetRect, 1);
+  utils::blt_image_onto_frame(self->current_frame, self->width, self->height, bufferData, frame_width, frame_height, targetRect, opacity);
 }
 
 // Draw an image at a specific place

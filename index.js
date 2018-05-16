@@ -64,7 +64,7 @@ class FFEncode {
    * @param {Number} width Width of image (must be <= movie width)
    * @param {Number} height Height of image (must be <= movie height)
    */
-  centerRGBAImage(buf, width, height) {
+  centerRGBAImage(buf, width, height, opacity = 1) {
     if (!(buf instanceof Buffer)) {
       throw new Error("Argument must be a buffer.");
     }
@@ -76,7 +76,7 @@ class FFEncode {
       throw new Error("Buffer length does not match provided width and height * 4 (not an RGBA array?)");
     }
     
-    this._enc.centerRGBAImage(buf, width, height);
+    this._enc.centerRGBAImage(buf, width, height, opacity);
     
   }
 
